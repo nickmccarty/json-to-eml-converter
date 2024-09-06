@@ -1,0 +1,9 @@
+{
+    "from": "john.doe@example.com",
+    "to": "jane.smith@example.com",
+    "subject": "Meeting Reminder",
+    "date": "2024-09-05T14:30:00Z",
+    "body": "Hi Jane,\n\nThis is a reminder for our meeting scheduled at 3:00 PM today.\n\nBest regards,\nJohn",
+    "htmlBody": "<p>Hi Jane,</p><p>This is a reminder for our meeting scheduled at <strong>3:00 PM</strong> today.</p><p>Best regards,<br>John</p>"
+  }
+  
