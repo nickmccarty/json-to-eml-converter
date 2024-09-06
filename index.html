@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON to EML Converter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">JSON to EML Converter</h2>
+
+        <!-- File Upload Section -->
+        <div class="mb-3">
+            <label for="jsonFile" class="form-label">Upload JSON File</label>
+            <input class="form-control" type="file" id="jsonFile" accept=".json">
+        </div>
+
+        <!-- Display Uploaded JSON -->
+        <div class="mb-3">
+            <label for="jsonPreview" class="form-label">JSON Preview</label>
+            <textarea class="form-control" id="jsonPreview" rows="10" readonly></textarea>
+        </div>
+
+        <!-- Download EML Button -->
+        <button id="downloadEml" class="btn btn-primary" disabled>Download EML</button>
+    </div>
+
+    <script>
+        // Handle file upload and display JSON
+        document.getElementById('jsonFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    document.getElementById('jsonPreview').value = content;
+                    document.getElementById('downloadEml').disabled = false; // Enable the download button
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Convert JSON to EML function
+        function jsonToEml(json) {
+            let eml = [
+                `From: ${json.from}`,
+                `To: ${json.to}`,
+                `Subject: ${json.subject}`,
+                `Date: ${new Date(json.date).toUTCString()}`,
+                `MIME-Version: 1.0`,
+                `Content-Type: multipart/alternative; boundary="boundary123"`
+            ].join("\r\n");
+
+            eml += `\r\n\r\n--boundary123\r\n`;
+            eml += `Content-Type: text/plain; charset="UTF-8"\r\n\r\n`;
+            eml += `${json.body || "No plain text body provided"}\r\n`;
+
+            eml += `\r\n--boundary123\r\n`;
+            eml += `Content-Type: text/html; charset="UTF-8"\r\n\r\n`;
+            eml += `${json.htmlBody || "<p>No HTML body provided</p>"}\r\n`;
+
+            eml += `\r\n--boundary123--`;
+
+            return eml;
+        }
+
+        // Download EML File
+        function downloadEmlFile(emlContent) {
+            const blob = new Blob([emlContent], { type: 'message/rfc822' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'email.eml';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Handle EML Download
+        document.getElementById('downloadEml').addEventListener('click', function() {
+            const jsonText = document.getElementById('jsonPreview').value;
+            if (jsonText) {
+                try {
+                    const json = JSON.parse(jsonText);
+                    const emlContent = jsonToEml(json);
+                    downloadEmlFile(emlContent);
+                } catch (e) {
+                    alert("Invalid JSON format");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
